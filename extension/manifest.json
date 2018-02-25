@@ -16,6 +16,12 @@
 		"192": "icons/icon-192.png"
 	},
 
+	"options_ui": {
+		"page": "options.html"
+	},
+
+	"permissions": ["storage"],
+
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
