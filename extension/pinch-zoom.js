@@ -20,13 +20,15 @@ Feel free to get in touch via email if you have any questions
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const pinchZoomSpeed = isMac ? 0.015 : 0.03;
 const scaleMode = 1; // 0 = always high quality, 1 = low-quality while zooming
-const shiftKeyZoom = true;// enable zoom with shift + scroll
 const shiftKeyZoomSpeed = pinchZoomSpeed;
 const minScale = 1.0;
 const maxScale = 10;
 const maxTapDistance = 10;
 const maxTapDuration = 250;
 const maxTapInterval = 300;
+// user configurable options
+let shiftKeyZoom = true; // enable zoom with shift + scroll
+let doubleTapReset = true; // enable double tap to reset zoom
 // state
 let pageScale = 1;
 let translationX = 0;
@@ -51,6 +53,14 @@ if (quirksMode) {
 
 // browser-hint optimization - I found this causes issues with some sites like maps.google.com
 // pageElement.style.willChange = 'transform';
+
+// load extension options
+browser.storage.local.get().then((options) => {
+	if ('shiftKeyZoom' in options) shiftKeyZoom = options.shiftKeyZoom;
+	if ('doubleTapReset' in options) doubleTapReset = options.doubleTapReset;
+}, (error) => {
+	console.log(`Failed to load extension options: ${error}`);
+});
 
 // we track the state of the ctrl key in order to distinguish mouse-wheel events from pinch gestures
 let realCtrlDown = false;
@@ -119,7 +129,7 @@ let lastTouchY = false;
 let tapCount = 0;
 
 window.addEventListener(`mousedown`, (e) => {
-	if (pageScale == 1) return;
+	if (pageScale == 1 || !doubleTapReset) return;
 	if (getTouchInterval() >= maxTapInterval ||
 		getTouchDistance(e.pageX, e.pageY) >= maxTapDistance)
 		tapCount = 0;
@@ -127,7 +137,7 @@ window.addEventListener(`mousedown`, (e) => {
 });
 
 window.addEventListener(`mouseup`, (e) => {
-	if (pageScale == 1) return;
+	if (pageScale == 1 || !doubleTapReset) return;
 	if (getTouchInterval() >= maxTapDuration ||
 		getTouchDistance(e.pageX, e.pageY) >= maxTapDistance)
 		resetTouchInfo();
@@ -140,7 +150,6 @@ window.addEventListener(`mouseup`, (e) => {
 			e.stopPropagation();
 		}
 	}
-	console.log(tapCount);
 });
 
 function getTouchInterval() {

@@ -1,11 +1,11 @@
 function loadOptions() {
 	let getting = browser.storage.local.get();
-	getting.then((entries) => {
+	getting.then((options) => {
 		// Options loaded
 		document.querySelectorAll("input").forEach((i) => {
 			// Fill each checkbox with saved value
-			if (i.dataset.key in entries) {
-				i.checked = entries[i.dataset.key];
+			if (i.dataset.key in options) {
+				i.checked = options[i.dataset.key];
 			} else {
 				// Fallback to default
 				i.checked = (i.dataset.default === "true");
